@@ -83,7 +83,14 @@ private:
 
     // 列表项创建
     QListWidgetItem *createModListItem(ModItem *mod);
+    QListWidgetItem *createLoadedModListItem(ModItem *mod);
     QString getModDisplayText(ModItem *mod);
+
+    // 依赖检查
+    bool checkModDependencies(ModItem *mod, QStringList &missingDeps);
+    bool checkModLoadOrder(ModItem *mod, QStringList &orderIssues);
+    QStringList checkDependentMods(const QString &packageId);
+    void updateLoadedListWithDependencyCheck();
 
     // 状态查询
     bool isModLoaded(const QString &packageId);

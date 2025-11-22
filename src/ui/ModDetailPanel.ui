@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>790</height>
+    <height>876</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -212,7 +212,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <item>
        <widget class="QLabel" name="loadBeforeLabel">
         <property name="text">
-         <string>应在之前加载:</string>
+         <string>应在~之前加载:</string>
         </property>
        </widget>
       </item>
@@ -235,7 +235,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <item>
        <widget class="QLabel" name="loadAfterLabel">
         <property name="text">
-         <string>应在之后加载:</string>
+         <string>应在~之后加载:</string>
         </property>
        </widget>
       </item>
@@ -258,7 +258,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <item>
        <widget class="QLabel" name="forceLoadBeforeLabel">
         <property name="text">
-         <string>强制在之前加载 (硬性约束):</string>
+         <string>强制在~之前加载 (硬性约束):</string>
         </property>
        </widget>
       </item>
@@ -281,7 +281,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <item>
        <widget class="QLabel" name="forceLoadAfterLabel">
         <property name="text">
-         <string>强制在之后加载 (硬性约束):</string>
+         <string>强制在~之后加载 (硬性约束):</string>
         </property>
        </widget>
       </item>

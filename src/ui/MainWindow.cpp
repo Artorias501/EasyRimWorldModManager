@@ -10,8 +10,10 @@
 #include <QFileDialog>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QMap>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QSet>
 #include <QStandardPaths>
 #include <QtConcurrent>
 
@@ -194,7 +196,7 @@ void MainWindow::updateLoadedList()
         ModItem *mod = getModByPackageId(packageId);
         if (mod)
         {
-            QListWidgetItem *item = createModListItem(mod);
+            QListWidgetItem *item = createLoadedModListItem(mod);
             ui->loadedModsList->addItem(item);
         }
     }
@@ -220,6 +222,223 @@ QListWidgetItem *MainWindow::createModListItem(ModItem *mod)
     }
 
     return item;
+}
+
+QListWidgetItem *MainWindow::createLoadedModListItem(ModItem *mod)
+{
+    QString displayText = getModDisplayText(mod);
+    QString typeText = mod->type.isEmpty() ? "未分类" : mod->type;
+
+    QListWidgetItem *item = new QListWidgetItem();
+    item->setText(QString("%1\n[%2]").arg(displayText, typeText));
+    item->setData(Qt::UserRole, mod->packageId);
+
+    // 检查依赖和加载顺序
+    QStringList missingDeps;
+    QStringList orderIssues;
+    bool depsOk = checkModDependencies(mod, missingDeps);
+    bool orderOk = checkModLoadOrder(mod, orderIssues);
+
+    if (!depsOk)
+    {
+        // 依赖未满足，标红并添加提示
+        item->setForeground(QColor(220, 20, 60)); // 深红色
+        QString tooltip = QString("依赖未满足:\n%1").arg(missingDeps.join("\n"));
+
+        // 如果加载顺序也有问题，一并显示
+        if (!orderOk)
+        {
+            tooltip += QString("\n\n加载顺序错误:\n%1").arg(orderIssues.join("\n"));
+        }
+
+        item->setToolTip(tooltip);
+    }
+    else if (!orderOk)
+    {
+        // 依赖满足但加载顺序错误，标黄并添加提示
+        item->setForeground(QColor(218, 165, 32)); // 金黄色
+        QString tooltip = QString("加载顺序错误:\n%1").arg(orderIssues.join("\n"));
+        item->setToolTip(tooltip);
+    }
+    else
+    {
+        // 依赖和顺序都满足，根据类型设置颜色
+        if (mod->isOfficialDLC)
+        {
+            item->setForeground(QColor(0, 120, 215)); // 蓝色
+        }
+        else if (mod->packageId.toLower() == "ludeon.rimworld")
+        {
+            item->setForeground(QColor(0, 150, 0)); // 绿色 - Core
+        }
+    }
+
+    return item;
+}
+
+bool MainWindow::checkModDependencies(ModItem *mod, QStringList &missingDeps)
+{
+    missingDeps.clear();
+
+    if (!mod)
+    {
+        return true;
+    }
+
+    // 获取当前已加载的mod列表
+    QStringList activeMods = configManager->getActiveMods();
+    QSet<QString> activeModsSet;
+    for (const QString &id : activeMods)
+    {
+        activeModsSet.insert(id.toLower());
+    }
+
+    // 检查dependencies（必须依赖）
+    for (const QString &depId : mod->dependencies)
+    {
+        if (!activeModsSet.contains(depId.toLower()))
+        {
+            missingDeps.append(QString("[依赖] %1").arg(depId));
+        }
+    }
+
+    // 检查forceLoadAfter（强制前置）
+    for (const QString &depId : mod->forceLoadAfter)
+    {
+        if (!activeModsSet.contains(depId.toLower()))
+        {
+            missingDeps.append(QString("[强制前置] %1").arg(depId));
+        }
+    }
+
+    return missingDeps.isEmpty();
+}
+
+bool MainWindow::checkModLoadOrder(ModItem *mod, QStringList &orderIssues)
+{
+    orderIssues.clear();
+
+    if (!mod)
+    {
+        return true;
+    }
+
+    // 获取当前已加载的mod列表
+    QStringList activeMods = configManager->getActiveMods();
+
+    // 建立 packageId 到索引的映射
+    QMap<QString, int> modIndexMap;
+    for (int i = 0; i < activeMods.size(); ++i)
+    {
+        modIndexMap[activeMods[i].toLower()] = i;
+    }
+
+    // 获取当前mod的索引
+    int currentIndex = modIndexMap.value(mod->packageId.toLower(), -1);
+    if (currentIndex == -1)
+    {
+        return true; // mod不在列表中
+    }
+
+    // 检查loadAfter（应该在这些mod之后加载）
+    for (const QString &afterId : mod->loadAfter)
+    {
+        int afterIndex = modIndexMap.value(afterId.toLower(), -1);
+        if (afterIndex != -1 && currentIndex < afterIndex)
+        {
+            orderIssues.append(QString("应在 %1 之后加载").arg(afterId));
+        }
+    }
+
+    // 检查forceLoadAfter（强制在这些mod之后加载）
+    for (const QString &afterId : mod->forceLoadAfter)
+    {
+        int afterIndex = modIndexMap.value(afterId.toLower(), -1);
+        if (afterIndex != -1 && currentIndex < afterIndex)
+        {
+            orderIssues.append(QString("必须在 %1 之后加载").arg(afterId));
+        }
+    }
+
+    // 检查loadBefore（应该在这些mod之前加载）
+    for (const QString &beforeId : mod->loadBefore)
+    {
+        int beforeIndex = modIndexMap.value(beforeId.toLower(), -1);
+        if (beforeIndex != -1 && currentIndex > beforeIndex)
+        {
+            orderIssues.append(QString("应在 %1 之前加载").arg(beforeId));
+        }
+    }
+
+    // 检查forceLoadBefore（强制在这些mod之前加载）
+    for (const QString &beforeId : mod->forceLoadBefore)
+    {
+        int beforeIndex = modIndexMap.value(beforeId.toLower(), -1);
+        if (beforeIndex != -1 && currentIndex > beforeIndex)
+        {
+            orderIssues.append(QString("必须在 %1 之前加载").arg(beforeId));
+        }
+    }
+
+    return orderIssues.isEmpty();
+}
+
+QStringList MainWindow::checkDependentMods(const QString &packageId)
+{
+    QStringList dependents;
+    QStringList activeMods = configManager->getActiveMods();
+
+    for (const QString &activeId : activeMods)
+    {
+        ModItem *mod = getModByPackageId(activeId);
+        if (!mod || activeId.compare(packageId, Qt::CaseInsensitive) == 0)
+        {
+            continue;
+        }
+
+        // 检查是否依赖于要移除的mod
+        bool isDependant = false;
+
+        // 检查dependencies
+        for (const QString &dep : mod->dependencies)
+        {
+            if (dep.compare(packageId, Qt::CaseInsensitive) == 0)
+            {
+                dependents.append(QString("%1 [依赖]").arg(getModDisplayText(mod)));
+                isDependant = true;
+                break;
+            }
+        }
+
+        if (isDependant)
+            continue;
+
+        // 检查forceLoadAfter
+        for (const QString &dep : mod->forceLoadAfter)
+        {
+            if (dep.compare(packageId, Qt::CaseInsensitive) == 0)
+            {
+                dependents.append(QString("%1 [强制前置]").arg(getModDisplayText(mod)));
+                isDependant = true;
+                break;
+            }
+        }
+
+        if (isDependant)
+            continue;
+
+        // 检查loadAfter
+        for (const QString &dep : mod->loadAfter)
+        {
+            if (dep.compare(packageId, Qt::CaseInsensitive) == 0)
+            {
+                dependents.append(QString("%1 [建议前置]").arg(getModDisplayText(mod)));
+                break;
+            }
+        }
+    }
+
+    return dependents;
 }
 
 QString MainWindow::getModDisplayText(ModItem *mod)
@@ -496,6 +715,25 @@ void MainWindow::onRemoveMod()
         return;
     }
 
+    // 检查是否有其他mod依赖于这个mod
+    QStringList dependents = checkDependentMods(packageId);
+    if (!dependents.isEmpty())
+    {
+        QString message = QString("以下 Mod 依赖于此 Mod：\n\n%1\n\n确定要移除吗？")
+                              .arg(dependents.join("\n"));
+
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "依赖警告",
+            message,
+            QMessageBox::Yes | QMessageBox::No);
+
+        if (reply != QMessageBox::Yes)
+        {
+            return;
+        }
+    }
+
     configManager->removeMod(packageId);
     updateModLists();
     showStatusMessage("Mod 已移除");
@@ -661,6 +899,10 @@ void MainWindow::onLoadedListOrderChanged()
     }
 
     configManager->setActiveMods(newOrder);
+
+    // 重新更新列表以检查依赖和加载顺序
+    updateLoadedList();
+
     showStatusMessage("加载顺序已更新");
 }
 
