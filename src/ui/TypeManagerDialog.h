@@ -28,8 +28,6 @@ private:
     UserDataManager *userDataManager;
 
     void loadTypes();
-    void loadDefaultTypes();
-    void loadCustomTypes();
 };
 
 #endif // TYPEMANAGERDIALOG_H

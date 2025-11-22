@@ -38,7 +38,7 @@
         <item>
          <widget class="QLineEdit" name="unloadedSearchEdit">
           <property name="placeholderText">
-           <string>搜索...</string>
+           <string>搜索类型、名称、备注</string>
           </property>
          </widget>
         </item>
@@ -61,22 +61,49 @@
       <widget class="QWidget" name="loadedModsPanel" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QLabel" name="loadedModsLabel">
-          <property name="text">
-           <string>已加载的 Mod</string>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="loadedHeaderLayout">
+          <item>
+           <widget class="QLabel" name="loadedModsLabel">
+            <property name="text">
+             <string>已加载的 Mod</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="autoSortButton">
+            <property name="text">
+             <string>智能排序 (Ctrl+R)</string>
+            </property>
+            <property name="toolTip">
+             <string>根据依赖关系和类型优先级自动排序</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QLineEdit" name="loadedSearchEdit">
           <property name="placeholderText">
-           <string>搜索...</string>
+           <string>搜索类型、名称、备注</string>
           </property>
          </widget>
         </item>

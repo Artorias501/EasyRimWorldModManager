@@ -9,21 +9,8 @@
 
 // 定义文件名常量
 const QString UserDataManager::MOD_DATA_FILE = "mod_data.json";
-const QString UserDataManager::CUSTOM_TYPES_FILE = "custom_types.json";
+const QString UserDataManager::TYPES_FILE = "types.json";
 const QString UserDataManager::TYPE_PRIORITY_FILE = "type_priority.json";
-
-// 定义默认类型列表
-const QStringList UserDataManager::s_defaultTypes = {
-    "核心",
-    "DLC",
-    "前置框架",
-    "逻辑mod",
-    "功能性mod",
-    "种族mod",
-    "种族扩展mod",
-    "单一功能mod",
-    "汉化",
-    "优化"};
 
 UserDataManager::UserDataManager()
 {
@@ -69,71 +56,35 @@ void UserDataManager::removeModRemark(const QString &packageId)
     m_modRemarks.remove(packageId);
 }
 
-QStringList UserDataManager::getAllCustomTypes() const
-{
-    return m_customTypes;
-}
-
 QStringList UserDataManager::getAllTypes() const
 {
-    QStringList allTypes = s_defaultTypes;
-
-    // 添加自定义类型
-    for (const QString &type : m_customTypes)
-    {
-        if (!allTypes.contains(type))
-        {
-            allTypes.append(type);
-        }
-    }
-
-    return allTypes;
+    return m_types;
 }
 
-QStringList UserDataManager::getDefaultTypes()
+bool UserDataManager::addType(const QString &type)
 {
-    return s_defaultTypes;
-}
-
-bool UserDataManager::addCustomType(const QString &type)
-{
-    if (type.isEmpty() || s_defaultTypes.contains(type))
+    if (type.isEmpty())
     {
-        return false; // 不能添加空类型或与默认类型重复的类型
+        return false; // 不能添加空类型
     }
 
-    if (m_customTypes.contains(type))
+    if (m_types.contains(type))
     {
         return false; // 已存在
     }
 
-    m_customTypes.append(type);
+    m_types.append(type);
     return true;
 }
 
-bool UserDataManager::removeCustomType(const QString &type)
+bool UserDataManager::removeType(const QString &type)
 {
-    if (s_defaultTypes.contains(type))
-    {
-        return false; // 不能删除默认类型
-    }
-
-    return m_customTypes.removeOne(type);
+    return m_types.removeOne(type);
 }
 
 bool UserDataManager::hasType(const QString &type) const
 {
-    return s_defaultTypes.contains(type) || m_customTypes.contains(type);
-}
-
-bool UserDataManager::isDefaultType(const QString &type) const
-{
-    return s_defaultTypes.contains(type);
-}
-
-bool UserDataManager::hasCustomType(const QString &type) const
-{
-    return m_customTypes.contains(type);
+    return m_types.contains(type);
 }
 
 // ==================== 数据持久化 ====================
@@ -230,20 +181,24 @@ bool UserDataManager::saveModData()
     return true;
 }
 
-bool UserDataManager::loadCustomTypes()
+bool UserDataManager::loadTypes()
 {
-    QString filePath = QDir(getModDataPath()).absoluteFilePath(CUSTOM_TYPES_FILE);
+    QString filePath = QDir(getModDataPath()).absoluteFilePath(TYPES_FILE);
     QFile file(filePath);
 
     if (!file.exists())
     {
-        qDebug() << "自定义类型文件不存在，使用空列表";
+        qDebug() << "Mod类型文件不存在，使用默认类型（核心、DLC）";
+        // 首次加载，添加默认的两个类型
+        m_types.clear();
+        m_types.append("核心");
+        m_types.append("DLC");
         return true;
     }
 
     if (!file.open(QIODevice::ReadOnly))
     {
-        qWarning() << "无法打开自定义类型文件:" << filePath;
+        qWarning() << "无法打开Mod类型文件:" << filePath;
         return false;
     }
 
@@ -253,56 +208,56 @@ bool UserDataManager::loadCustomTypes()
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (!doc.isObject())
     {
-        qWarning() << "自定义类型文件格式错误";
+        qWarning() << "Mod类型文件格式错误";
         return false;
     }
 
     QJsonObject root = doc.object();
-    m_customTypes.clear();
+    m_types.clear();
 
-    if (root.contains("customTypes") && root["customTypes"].isArray())
+    if (root.contains("types") && root["types"].isArray())
     {
-        QJsonArray types = root["customTypes"].toArray();
+        QJsonArray types = root["types"].toArray();
         for (const QJsonValue &value : types)
         {
             QString type = value.toString();
             if (!type.isEmpty())
             {
-                m_customTypes.append(type);
+                m_types.append(type);
             }
         }
     }
 
-    qDebug() << "成功加载" << m_customTypes.size() << "个自定义类型";
+    qDebug() << "成功加载" << m_types.size() << "个Mod类型";
     return true;
 }
 
-bool UserDataManager::saveCustomTypes()
+bool UserDataManager::saveTypes()
 {
-    QString filePath = QDir(getModDataPath()).absoluteFilePath(CUSTOM_TYPES_FILE);
+    QString filePath = QDir(getModDataPath()).absoluteFilePath(TYPES_FILE);
     QFile file(filePath);
 
     if (!file.open(QIODevice::WriteOnly))
     {
-        qWarning() << "无法创建自定义类型文件:" << filePath;
+        qWarning() << "无法创建Mod类型文件:" << filePath;
         return false;
     }
 
     QJsonObject root;
     QJsonArray types;
 
-    for (const QString &type : m_customTypes)
+    for (const QString &type : m_types)
     {
         types.append(type);
     }
 
-    root["customTypes"] = types;
+    root["types"] = types;
 
     QJsonDocument doc(root);
     file.write(doc.toJson(QJsonDocument::Indented));
     file.close();
 
-    qDebug() << "成功保存自定义类型到:" << filePath;
+    qDebug() << "成功保存Mod类型到:" << filePath;
     return true;
 }
 
@@ -392,7 +347,7 @@ bool UserDataManager::loadAll()
 {
     bool success = true;
     success &= loadModData();
-    success &= loadCustomTypes();
+    success &= loadTypes();
     success &= loadTypePriority();
     return success;
 }
@@ -401,7 +356,7 @@ bool UserDataManager::saveAll()
 {
     bool success = true;
     success &= saveModData();
-    success &= saveCustomTypes();
+    success &= saveTypes();
     success &= saveTypePriority();
     return success;
 }

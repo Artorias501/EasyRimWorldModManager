@@ -15,42 +15,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="infoLabel">
-     <property name="text">
-      <string>默认类型不可删除，只能管理自定义类型</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="defaultTypesGroup">
+    <widget class="QGroupBox" name="typesGroup">
      <property name="title">
-      <string>默认类型</string>
+      <string>Mod 类型</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QListWidget" name="defaultTypesList">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="maximumHeight">
-         <number>120</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="customTypesGroup">
-     <property name="title">
-      <string>自定义类型</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QListWidget" name="customTypesList"/>
+       <widget class="QListWidget" name="typesList"/>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">

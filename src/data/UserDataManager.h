@@ -39,29 +39,17 @@ public:
     // 移除Mod的备注
     void removeModRemark(const QString &packageId);
 
-    // 获取所有自定义类型
-    QStringList getAllCustomTypes() const;
-
-    // 获取所有可用类型（默认类型 + 自定义类型）
+    // 获取所有Mod类型
     QStringList getAllTypes() const;
 
-    // 获取默认类型列表
-    static QStringList getDefaultTypes();
+    // 添加Mod类型
+    bool addType(const QString &type);
 
-    // 添加自定义类型
-    bool addCustomType(const QString &type);
+    // 移除Mod类型
+    bool removeType(const QString &type);
 
-    // 移除自定义类型
-    bool removeCustomType(const QString &type);
-
-    // 检查类型是否存在（包括默认类型和自定义类型）
+    // 检查类型是否存在
     bool hasType(const QString &type) const;
-
-    // 检查是否为默认类型
-    bool isDefaultType(const QString &type) const;
-
-    // 检查自定义类型是否存在
-    bool hasCustomType(const QString &type) const;
 
     // ==================== 类型优先级管理 ====================
 
@@ -85,11 +73,11 @@ public:
     // 保存Mod数据（类型和备注）
     bool saveModData();
 
-    // 加载自定义类型列表
-    bool loadCustomTypes();
+    // 加载Mod类型列表
+    bool loadTypes();
 
-    // 保存自定义类型列表
-    bool saveCustomTypes();
+    // 保存Mod类型列表
+    bool saveTypes();
 
     // 加载所有用户数据
     bool loadAll();
@@ -129,15 +117,12 @@ public:
 private:
     QMap<QString, QString> m_modTypes;   // PackageId -> Type
     QMap<QString, QString> m_modRemarks; // PackageId -> Remark
-    QStringList m_customTypes;           // 自定义类型列表
+    QStringList m_types;                 // Mod类型列表
     QStringList m_typePriority;          // 类型优先级列表（从高到低）
-
-    // 默认类型列表
-    static const QStringList s_defaultTypes;
 
     // 文件名常量
     static const QString MOD_DATA_FILE;
-    static const QString CUSTOM_TYPES_FILE;
+    static const QString TYPES_FILE;
     static const QString TYPE_PRIORITY_FILE;
 };
 

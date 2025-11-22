@@ -23,29 +23,12 @@ TypeManagerDialog::~TypeManagerDialog()
 
 void TypeManagerDialog::loadTypes()
 {
-    loadDefaultTypes();
-    loadCustomTypes();
-}
+    ui->typesList->clear();
 
-void TypeManagerDialog::loadDefaultTypes()
-{
-    ui->defaultTypesList->clear();
-
-    QStringList defaultTypes = UserDataManager::getDefaultTypes();
-    for (const QString &type : defaultTypes)
+    QStringList types = userDataManager->getAllTypes();
+    for (const QString &type : types)
     {
-        ui->defaultTypesList->addItem(type);
-    }
-}
-
-void TypeManagerDialog::loadCustomTypes()
-{
-    ui->customTypesList->clear();
-
-    QStringList customTypes = userDataManager->getAllCustomTypes();
-    for (const QString &type : customTypes)
-    {
-        ui->customTypesList->addItem(type);
+        ui->typesList->addItem(type);
     }
 }
 
@@ -67,10 +50,10 @@ void TypeManagerDialog::onAddType()
     }
 
     // 添加类型
-    if (userDataManager->addCustomType(newType))
+    if (userDataManager->addType(newType))
     {
         ui->newTypeEdit->clear();
-        loadCustomTypes();
+        loadTypes();
         QMessageBox::information(this, "添加成功", QString("已添加类型: %1").arg(newType));
     }
     else
@@ -81,7 +64,7 @@ void TypeManagerDialog::onAddType()
 
 void TypeManagerDialog::onDeleteType()
 {
-    QListWidgetItem *currentItem = ui->customTypesList->currentItem();
+    QListWidgetItem *currentItem = ui->typesList->currentItem();
 
     if (!currentItem)
     {
@@ -100,9 +83,9 @@ void TypeManagerDialog::onDeleteType()
 
     if (reply == QMessageBox::Yes)
     {
-        if (userDataManager->removeCustomType(typeName))
+        if (userDataManager->removeType(typeName))
         {
-            loadCustomTypes();
+            loadTypes();
             QMessageBox::information(this, "删除成功", QString("已删除类型: %1").arg(typeName));
         }
         else
