@@ -176,6 +176,10 @@
      <string>管理</string>
     </property>
     <addaction name="actionManageTypes"/>
+    <addaction name="actionTypePriority"/>
+    <addaction name="separator"/>
+    <addaction name="actionAutoSort"/>
+    <addaction name="separator"/>
     <addaction name="actionRescan"/>
     <addaction name="separator"/>
     <addaction name="actionPathSettings"/>
@@ -241,6 +245,19 @@
   <action name="actionPathSettings">
    <property name="text">
     <string>路径设置...</string>
+   </property>
+  </action>
+  <action name="actionTypePriority">
+   <property name="text">
+    <string>类型优先级设置...</string>
+   </property>
+  </action>
+  <action name="actionAutoSort">
+   <property name="text">
+    <string>智能排序</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

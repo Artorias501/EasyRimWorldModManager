@@ -36,6 +36,8 @@ private slots:
     void onManageTypes();
     void onRescan();
     void onPathSettings();
+    void onTypePriority();
+    void onAutoSort();
     void onAbout();
 
     // Mod列表操作

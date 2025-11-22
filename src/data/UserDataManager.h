@@ -63,6 +63,20 @@ public:
     // 检查自定义类型是否存在
     bool hasCustomType(const QString &type) const;
 
+    // ==================== 类型优先级管理 ====================
+
+    // 获取类型优先级列表（从高到低）
+    QStringList getTypePriority() const;
+
+    // 设置类型优先级列表
+    void setTypePriority(const QStringList &priority);
+
+    // 加载类型优先级
+    bool loadTypePriority();
+
+    // 保存类型优先级
+    bool saveTypePriority();
+
     // ==================== 数据持久化 ====================
 
     // 加载Mod数据（类型和备注）
@@ -116,6 +130,7 @@ private:
     QMap<QString, QString> m_modTypes;   // PackageId -> Type
     QMap<QString, QString> m_modRemarks; // PackageId -> Remark
     QStringList m_customTypes;           // 自定义类型列表
+    QStringList m_typePriority;          // 类型优先级列表（从高到低）
 
     // 默认类型列表
     static const QStringList s_defaultTypes;
@@ -123,6 +138,7 @@ private:
     // 文件名常量
     static const QString MOD_DATA_FILE;
     static const QString CUSTOM_TYPES_FILE;
+    static const QString TYPE_PRIORITY_FILE;
 };
 
 #endif // USERDATAMANAGER_H

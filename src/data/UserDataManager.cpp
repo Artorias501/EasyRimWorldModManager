@@ -10,6 +10,7 @@
 // 定义文件名常量
 const QString UserDataManager::MOD_DATA_FILE = "mod_data.json";
 const QString UserDataManager::CUSTOM_TYPES_FILE = "custom_types.json";
+const QString UserDataManager::TYPE_PRIORITY_FILE = "type_priority.json";
 
 // 定义默认类型列表
 const QStringList UserDataManager::s_defaultTypes = {
@@ -305,11 +306,94 @@ bool UserDataManager::saveCustomTypes()
     return true;
 }
 
+// ==================== 类型优先级管理 ====================
+
+QStringList UserDataManager::getTypePriority() const
+{
+    return m_typePriority;
+}
+
+void UserDataManager::setTypePriority(const QStringList &priority)
+{
+    m_typePriority = priority;
+}
+
+bool UserDataManager::loadTypePriority()
+{
+    QString filePath = QDir(getModDataPath()).absoluteFilePath(TYPE_PRIORITY_FILE);
+
+    QFile file(filePath);
+    if (!file.exists())
+    {
+        qDebug() << "类型优先级文件不存在，使用默认顺序";
+        m_typePriority.clear();
+        return true;
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qWarning() << "无法打开类型优先级文件:" << filePath;
+        return false;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isObject())
+    {
+        qWarning() << "类型优先级文件格式错误";
+        return false;
+    }
+
+    QJsonObject root = doc.object();
+    QJsonArray priorityArray = root.value("priority").toArray();
+
+    m_typePriority.clear();
+    for (const QJsonValue &value : priorityArray)
+    {
+        m_typePriority.append(value.toString());
+    }
+
+    qDebug() << "成功加载类型优先级:" << m_typePriority.size() << "个类型";
+    return true;
+}
+
+bool UserDataManager::saveTypePriority()
+{
+    QString filePath = QDir(getModDataPath()).absoluteFilePath(TYPE_PRIORITY_FILE);
+
+    QJsonObject root;
+    QJsonArray priorityArray;
+
+    for (const QString &type : m_typePriority)
+    {
+        priorityArray.append(type);
+    }
+
+    root["priority"] = priorityArray;
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qWarning() << "无法写入类型优先级文件:" << filePath;
+        return false;
+    }
+
+    QJsonDocument doc(root);
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+
+    qDebug() << "成功保存类型优先级到:" << filePath;
+    return true;
+}
+
 bool UserDataManager::loadAll()
 {
     bool success = true;
     success &= loadModData();
     success &= loadCustomTypes();
+    success &= loadTypePriority();
     return success;
 }
 
@@ -318,6 +402,7 @@ bool UserDataManager::saveAll()
     bool success = true;
     success &= saveModData();
     success &= saveCustomTypes();
+    success &= saveTypePriority();
     return success;
 }
 
