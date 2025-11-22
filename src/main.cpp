@@ -2,6 +2,7 @@
 #include "ui/MainWindow.h"
 #include "ui/PathSettingsDialog.h"
 #include <QApplication>
+#include <QFile>
 #include <QMessageBox>
 
 int main(int argc, char *argv[])
@@ -12,6 +13,26 @@ int main(int argc, char *argv[])
     app.setApplicationName("EasyRimWorldModManager");
     app.setApplicationVersion("1.0");
     app.setOrganizationName("RimWorld Tools");
+
+    // 加载样式表
+    QFile styleFile(":/styles/tokyonight.qss");
+    if (styleFile.open(QFile::ReadOnly | QFile::Text))
+    {
+        QString styleSheet = QString::fromUtf8(styleFile.readAll());
+        app.setStyleSheet(styleSheet);
+        styleFile.close();
+    }
+    else
+    {
+        // 如果资源文件未找到，尝试从文件系统加载
+        QFile localStyleFile("resources/styles/tokyonight.qss");
+        if (localStyleFile.open(QFile::ReadOnly | QFile::Text))
+        {
+            QString styleSheet = QString::fromUtf8(localStyleFile.readAll());
+            app.setStyleSheet(styleSheet);
+            localStyleFile.close();
+        }
+    }
 
     // 检查路径配置是否存在
     PathConfig pathConfig;

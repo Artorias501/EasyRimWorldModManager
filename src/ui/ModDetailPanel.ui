@@ -97,6 +97,20 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="steamIdLabel">
+        <property name="text">
+         <string>Steam ID</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="steamIdValue">
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -132,6 +146,12 @@
       </item>
       <item row="1" column="1">
        <widget class="QTextEdit" name="remarkTextEdit">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>80</height>
+         </size>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
         </property>
@@ -174,7 +194,20 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="dependenciesList"/>
+       <widget class="QListWidget" name="dependenciesList">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="loadBeforeLabel">
@@ -184,7 +217,20 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="loadBeforeList"/>
+       <widget class="QListWidget" name="loadBeforeList">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="loadAfterLabel">
@@ -194,7 +240,66 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="loadAfterList"/>
+       <widget class="QListWidget" name="loadAfterList">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="forceLoadBeforeLabel">
+        <property name="text">
+         <string>强制在之前加载 (硬性约束):</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="forceLoadBeforeList">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="forceLoadAfterLabel">
+        <property name="text">
+         <string>强制在之后加载 (硬性约束):</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="forceLoadAfterList">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="incompatibleLabel">
@@ -204,7 +309,20 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="incompatibleList"/>
+       <widget class="QListWidget" name="incompatibleList">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

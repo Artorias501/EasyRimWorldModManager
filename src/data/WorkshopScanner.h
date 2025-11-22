@@ -1,10 +1,11 @@
 #ifndef WORKSHOPSCANNER_H
 #define WORKSHOPSCANNER_H
 
+#include "ModItem.h"
 #include <QList>
 #include <QMap>
 #include <QString>
-#include "ModItem.h"
+#include <QXmlStreamReader>
 
 /**
  * @brief Steam创意工坊Mod扫描器
@@ -13,7 +14,8 @@
  * Steam工坊路径: {Steam安装路径}\steamapps\workshop\content\294100
  * 每个Mod目录包含: About\About.xml
  */
-class WorkshopScanner {
+class WorkshopScanner
+{
 public:
     WorkshopScanner();
 
@@ -46,9 +48,9 @@ public:
     static QString getDefaultWorkshopPath();
 
 private:
-    QString m_workshopPath; // Steam创意工坊路径
-    QList<ModItem *> m_scannedMods; // 扫描到的Mod列表
-    QMap<QString, ModItem *> m_packageIdMap; // PackageId到Mod的映射
+    QString m_workshopPath;                   // Steam创意工坊路径
+    QList<ModItem *> m_scannedMods;           // 扫描到的Mod列表
+    QMap<QString, ModItem *> m_packageIdMap;  // PackageId到Mod的映射
     QMap<QString, ModItem *> m_workshopIdMap; // WorkshopId到Mod的映射
 
     // 扫描单个Mod目录
@@ -56,6 +58,20 @@ private:
 
     // 解析About.xml文件
     bool parseAboutXml(ModItem *mod, const QString &aboutXmlPath);
+
+    // XML 解析辅助方法
+    void parseSupportedVersions(QXmlStreamReader &xml, ModItem *mod);
+    void parseModDependencies(QXmlStreamReader &xml, ModItem *mod);
+    void parseModDependenciesByVersion(QXmlStreamReader &xml, ModItem *mod);
+    QString parseDependencyItem(QXmlStreamReader &xml);
+    void parseLoadBefore(QXmlStreamReader &xml, ModItem *mod);
+    void parseLoadAfter(QXmlStreamReader &xml, ModItem *mod);
+    void parseLoadBeforeByVersion(QXmlStreamReader &xml, ModItem *mod);
+    void parseLoadAfterByVersion(QXmlStreamReader &xml, ModItem *mod);
+    void parseForceLoadBefore(QXmlStreamReader &xml, ModItem *mod);
+    void parseForceLoadAfter(QXmlStreamReader &xml, ModItem *mod);
+    void parseIncompatibleWith(QXmlStreamReader &xml, ModItem *mod);
+    void parseIncompatibleWithByVersion(QXmlStreamReader &xml, ModItem *mod);
 
     // 辅助方法：从注册表读取Steam路径（Windows）
     static QString getSteamPathFromRegistry();

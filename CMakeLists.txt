@@ -17,8 +17,9 @@ find_package(Qt6 COMPONENTS
         REQUIRED)
 
 file(GLOB_RECURSE srcs CONFIGURE_DEPENDS src/*.cpp src/*.h src/*.ui)
+file(GLOB_RECURSE resources CONFIGURE_DEPENDS resources/*.qrc)
 
-add_executable(EasyRimWorldModManager ${srcs})
+add_executable(EasyRimWorldModManager ${srcs} ${resources})
 target_link_libraries(EasyRimWorldModManager
         Qt::Core
         Qt::Xml

@@ -4,24 +4,28 @@
 #include "../data/ModItem.h"
 #include "../data/ModManager.h"
 #include <QWidget>
+#include <QListWidget>
 
 QT_BEGIN_NAMESPACE
-namespace Ui
-{
+
+namespace Ui {
     class ModDetailPanel;
 }
+
 QT_END_NAMESPACE
 
-class ModDetailPanel : public QWidget
-{
+class ModDetailPanel : public QWidget {
     Q_OBJECT
 
 public:
     explicit ModDetailPanel(QWidget *parent = nullptr);
+
     ~ModDetailPanel();
 
     void setModItem(ModItem *mod, ModManager *manager);
+
     void clearDisplay();
+
     void refreshTypeComboBox();
 
 signals:
@@ -36,8 +40,12 @@ private:
     ModManager *modManager;
 
     void loadModTypes();
+
     void displayModInfo();
+
     void displayDependencies();
+
+    void adjustListHeight(QListWidget *listWidget);
 };
 
 #endif // MODDETAILPANEL_H

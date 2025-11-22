@@ -44,6 +44,8 @@ void ModDetailPanel::clearDisplay()
     ui->dependenciesList->clear();
     ui->loadBeforeList->clear();
     ui->loadAfterList->clear();
+    ui->forceLoadBeforeList->clear();
+    ui->forceLoadAfterList->clear();
     ui->incompatibleList->clear();
 
     ui->saveButton->setEnabled(false);
@@ -97,6 +99,7 @@ void ModDetailPanel::displayModInfo()
     ui->nameValue->setText(currentMod->name.isEmpty() ? "-" : currentMod->name);
     ui->packageIdValue->setText(currentMod->packageId.isEmpty() ? "-" : currentMod->packageId);
     ui->authorValue->setText(currentMod->author.isEmpty() ? "-" : currentMod->author);
+    ui->steamIdValue->setText(currentMod->steamId.isEmpty() ? "-" : currentMod->steamId);
 
     // 支持版本
     if (currentMod->supportedVersions.isEmpty())
@@ -153,6 +156,8 @@ void ModDetailPanel::displayDependencies()
             ui->dependenciesList->addItem(dep);
         }
     }
+    adjustListHeight(ui->dependenciesList);
+    adjustListHeight(ui->dependenciesList);
 
     // 应在之前加载
     ui->loadBeforeList->clear();
@@ -167,6 +172,8 @@ void ModDetailPanel::displayDependencies()
             ui->loadBeforeList->addItem(mod);
         }
     }
+    adjustListHeight(ui->loadBeforeList);
+    adjustListHeight(ui->loadBeforeList);
 
     // 应在之后加载
     ui->loadAfterList->clear();
@@ -181,6 +188,38 @@ void ModDetailPanel::displayDependencies()
             ui->loadAfterList->addItem(mod);
         }
     }
+    adjustListHeight(ui->loadAfterList);
+    adjustListHeight(ui->loadAfterList);
+
+    // 强制在之前加载
+    ui->forceLoadBeforeList->clear();
+    if (currentMod->forceLoadBefore.isEmpty())
+    {
+        ui->forceLoadBeforeList->addItem("(无)");
+    }
+    else
+    {
+        for (const QString &mod : currentMod->forceLoadBefore)
+        {
+            ui->forceLoadBeforeList->addItem(mod);
+        }
+    }
+    adjustListHeight(ui->forceLoadBeforeList);
+
+    // 强制在之后加载
+    ui->forceLoadAfterList->clear();
+    if (currentMod->forceLoadAfter.isEmpty())
+    {
+        ui->forceLoadAfterList->addItem("(无)");
+    }
+    else
+    {
+        for (const QString &mod : currentMod->forceLoadAfter)
+        {
+            ui->forceLoadAfterList->addItem(mod);
+        }
+    }
+    adjustListHeight(ui->forceLoadAfterList);
 
     // 不兼容
     ui->incompatibleList->clear();
@@ -195,6 +234,7 @@ void ModDetailPanel::displayDependencies()
             ui->incompatibleList->addItem(mod);
         }
     }
+    adjustListHeight(ui->incompatibleList);
 }
 
 void ModDetailPanel::onSaveClicked()
@@ -213,4 +253,35 @@ void ModDetailPanel::onSaveClicked()
 
     // 通知父窗口保存数据
     emit modDetailsChanged();
+}
+
+void ModDetailPanel::adjustListHeight(QListWidget *listWidget)
+{
+    if (!listWidget)
+    {
+        return;
+    }
+
+    int count = listWidget->count();
+    if (count == 0)
+    {
+        listWidget->setMaximumHeight(40);
+        listWidget->setMinimumHeight(40);
+        return;
+    }
+
+    // 计算需要的高度：项目数 * 每项高度 + 边距
+    int itemHeight = listWidget->sizeHintForRow(0);
+    int totalHeight = count * itemHeight + 8; // 8px 边距
+
+    // 限制最大高度
+    int maxHeight = 200;
+    totalHeight = qMin(totalHeight, maxHeight);
+
+    // 设置最小高度
+    int minHeight = 40;
+    totalHeight = qMax(totalHeight, minHeight);
+
+    listWidget->setMaximumHeight(totalHeight);
+    listWidget->setMinimumHeight(totalHeight);
 }

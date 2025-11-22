@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 设置splitter的初始比例 (1:1:1)
     ui->splitter->setStretchFactor(0, 1);
     ui->splitter->setStretchFactor(1, 1);
-    ui->splitter->setStretchFactor(2, 2);
+    ui->splitter->setStretchFactor(2, 3);
 
     // 初始化管理器
     initializeManagers();

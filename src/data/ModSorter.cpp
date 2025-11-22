@@ -85,6 +85,30 @@ void ModSorter::buildDependencyGraph(const QList<ModItem *> &mods,
                 outInDegree[beforeId]++;
             }
         }
+
+        // 处理 forceLoadAfter（mod 强制在这些包之后加载，硬性约束）
+        for (const QString &after : mod->forceLoadAfter)
+        {
+            QString afterId = after.toLower();
+            if (modMap.contains(afterId))
+            {
+                // afterId 必须在 modId 之前
+                outGraph[afterId].append(modId);
+                outInDegree[modId]++;
+            }
+        }
+
+        // 处理 forceLoadBefore（mod 强制在这些包之前加载，硬性约束）
+        for (const QString &before : mod->forceLoadBefore)
+        {
+            QString beforeId = before.toLower();
+            if (modMap.contains(beforeId))
+            {
+                // modId 必须在 beforeId 之前
+                outGraph[modId].append(beforeId);
+                outInDegree[beforeId]++;
+            }
+        }
     }
 }
 

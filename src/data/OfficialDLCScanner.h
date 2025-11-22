@@ -5,6 +5,7 @@
 #include <QList>
 #include <QMap>
 #include <QString>
+#include <QXmlStreamReader>
 
 /**
  * @brief 官方DLC扫描器
@@ -50,6 +51,20 @@ private:
 
     // 解析About.xml文件
     bool parseAboutXml(ModItem *dlc, const QString &aboutXmlPath);
+
+    // 辅助解析方法
+    void parseSupportedVersions(QXmlStreamReader &xml, ModItem *mod);
+    void parseModDependencies(QXmlStreamReader &xml, ModItem *mod);
+    void parseModDependenciesByVersion(QXmlStreamReader &xml, ModItem *mod);
+    QString parseDependencyItem(QXmlStreamReader &xml);
+    void parseLoadBefore(QXmlStreamReader &xml, ModItem *mod);
+    void parseLoadAfter(QXmlStreamReader &xml, ModItem *mod);
+    void parseLoadBeforeByVersion(QXmlStreamReader &xml, ModItem *mod);
+    void parseLoadAfterByVersion(QXmlStreamReader &xml, ModItem *mod);
+    void parseForceLoadBefore(QXmlStreamReader &xml, ModItem *mod);
+    void parseForceLoadAfter(QXmlStreamReader &xml, ModItem *mod);
+    void parseIncompatibleWith(QXmlStreamReader &xml, ModItem *mod);
+    void parseIncompatibleWithByVersion(QXmlStreamReader &xml, ModItem *mod);
 };
 
 #endif // OFFICIALDLCSCANNER_H
