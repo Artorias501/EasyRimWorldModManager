@@ -23,6 +23,11 @@ struct ModItem
     QStringList loadAfter;         // 需要在这些Mod之后加载
     QStringList incompatibleWith;  // 不兼容的Mod列表
 
+    QString remark;             // 备注
+    QString type;               // Mod类型（如：核心、DLC、前置框架等）
+    bool isOfficialDLC = false; // 是否为官方DLC（默认为false）
+    QString sourcePath;         // Mod来源路径（用于区分工坊mod和官方DLC）
+
     // 辅助方法
     void addDependency(const QString &dependency);
     void addLoadBefore(const QString &modId);

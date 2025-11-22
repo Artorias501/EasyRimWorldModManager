@@ -1,11 +1,10 @@
 #ifndef WORKSHOPSCANNER_H
 #define WORKSHOPSCANNER_H
 
+#include <QList>
 #include <QMap>
 #include <QString>
-#include <QVector>
-
-class ModItem;
+#include "ModItem.h"
 
 /**
  * @brief Steam创意工坊Mod扫描器
@@ -14,21 +13,22 @@ class ModItem;
  * Steam工坊路径: {Steam安装路径}\steamapps\workshop\content\294100
  * 每个Mod目录包含: About\About.xml
  */
-class WorkshopScanner
-{
+class WorkshopScanner {
 public:
     WorkshopScanner();
+
     explicit WorkshopScanner(const QString &workshopPath);
 
     // 设置Steam创意工坊路径
     void setWorkshopPath(const QString &path);
+
     QString getWorkshopPath() const { return m_workshopPath; }
 
     // 扫描所有Mod
     bool scanAllMods();
 
     // 获取扫描到的Mod列表
-    QVector<ModItem *> getScannedMods() const { return m_scannedMods; }
+    QList<ModItem *> getScannedMods() const { return m_scannedMods; }
 
     // 根据PackageId查找Mod
     ModItem *findModByPackageId(const QString &packageId) const;
@@ -46,9 +46,9 @@ public:
     static QString getDefaultWorkshopPath();
 
 private:
-    QString m_workshopPath;                   // Steam创意工坊路径
-    QVector<ModItem *> m_scannedMods;         // 扫描到的Mod列表
-    QMap<QString, ModItem *> m_packageIdMap;  // PackageId到Mod的映射
+    QString m_workshopPath; // Steam创意工坊路径
+    QList<ModItem *> m_scannedMods; // 扫描到的Mod列表
+    QMap<QString, ModItem *> m_packageIdMap; // PackageId到Mod的映射
     QMap<QString, ModItem *> m_workshopIdMap; // WorkshopId到Mod的映射
 
     // 扫描单个Mod目录

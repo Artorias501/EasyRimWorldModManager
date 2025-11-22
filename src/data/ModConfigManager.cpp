@@ -162,6 +162,7 @@ bool ModConfigManager::parseXml(const QString &xmlContent)
     m_activeMods.clear();
     m_knownExpansions.clear();
     m_version.clear();
+    m_otherFields.clear();
 
     while (!xml.atEnd() && !xml.hasError())
     {
@@ -170,6 +171,12 @@ bool ModConfigManager::parseXml(const QString &xmlContent)
         if (token == QXmlStreamReader::StartElement)
         {
             QString elementName = xml.name().toString();
+
+            // 跳过根元素
+            if (elementName == "ModsConfigData")
+            {
+                continue;
+            }
 
             if (elementName == "version")
             {
@@ -211,6 +218,12 @@ bool ModConfigManager::parseXml(const QString &xmlContent)
                     }
                 }
             }
+            else
+            {
+                // 保存其他未知字段
+                QString value = xml.readElementText();
+                m_otherFields[elementName] = value;
+            }
         }
     }
 
@@ -225,16 +238,16 @@ QString ModConfigManager::generateXml() const
     writer.setAutoFormatting(true);
     writer.setAutoFormattingIndent(2);
 
-    writer.writeStartDocument();
+    writer.writeStartDocument("1.0", true); // 明确指定版本和standalone
     writer.writeStartElement("ModsConfigData");
 
-    // 写入版本
+    // 写入版本（必须保留原始版本信息）
     if (!m_version.isEmpty())
     {
         writer.writeTextElement("version", m_version);
     }
 
-    // 写入激活的Mod列表
+    // 写入激活的Mod列表（包括核心、DLC和创意工坊mod）
     writer.writeStartElement("activeMods");
     for (const QString &modId : m_activeMods)
     {
@@ -242,15 +255,18 @@ QString ModConfigManager::generateXml() const
     }
     writer.writeEndElement(); // activeMods
 
-    // 写入已知扩展包
-    if (!m_knownExpansions.isEmpty())
+    // 写入已知扩展包（总是写入，即使为空，保持与原文件结构一致）
+    writer.writeStartElement("knownExpansions");
+    for (const QString &expansionId : m_knownExpansions)
     {
-        writer.writeStartElement("knownExpansions");
-        for (const QString &expansionId : m_knownExpansions)
-        {
-            writer.writeTextElement("li", expansionId);
-        }
-        writer.writeEndElement(); // knownExpansions
+        writer.writeTextElement("li", expansionId);
+    }
+    writer.writeEndElement(); // knownExpansions
+
+    // 写入其他保存的字段（保持原样）
+    for (auto it = m_otherFields.begin(); it != m_otherFields.end(); ++it)
+    {
+        writer.writeTextElement(it.key(), it.value());
     }
 
     writer.writeEndElement(); // ModsConfigData
