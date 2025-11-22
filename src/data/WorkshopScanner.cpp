@@ -33,6 +33,7 @@ bool WorkshopScanner::scanAllMods() {
         ModItem *mod = scanModDirectory(modDirPath, workshopId);
 
         if (mod && mod->isValid()) {
+            mod->packageId = mod->packageId.toLower();
             m_scannedMods.append(mod);
             m_packageIdMap[mod->packageId] = mod;
             m_workshopIdMap[workshopId] = mod;

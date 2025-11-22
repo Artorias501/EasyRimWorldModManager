@@ -5,20 +5,25 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_PREFIX_PATH "D:/Qt/6.10.1/6.10.1/msvc2022_64")
 
 find_package(Qt6 COMPONENTS
         Core
         Xml
+        Widgets
+        Concurrent
         REQUIRED)
 
-file(GLOB_RECURSE srcs CONFIGURE_DEPENDS src/*.cpp src/*.h)
+file(GLOB_RECURSE srcs CONFIGURE_DEPENDS src/*.cpp src/*.h src/*.ui)
 
 add_executable(EasyRimWorldModManager ${srcs})
 target_link_libraries(EasyRimWorldModManager
         Qt::Core
         Qt::Xml
+        Qt::Widgets
+        Qt::Concurrent
 )
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -42,7 +47,7 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
                 "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll"
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
     endif ()
-    foreach (QT_LIB Core Xml)
+    foreach (QT_LIB Core Xml Widgets Gui)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/bin/Qt6${QT_LIB}${DEBUG_SUFFIX}.dll"

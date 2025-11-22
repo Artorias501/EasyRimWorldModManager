@@ -42,13 +42,25 @@ public:
     // 获取所有自定义类型
     QStringList getAllCustomTypes() const;
 
+    // 获取所有可用类型（默认类型 + 自定义类型）
+    QStringList getAllTypes() const;
+
+    // 获取默认类型列表
+    static QStringList getDefaultTypes();
+
     // 添加自定义类型
     bool addCustomType(const QString &type);
 
     // 移除自定义类型
     bool removeCustomType(const QString &type);
 
-    // 检查类型是否存在
+    // 检查类型是否存在（包括默认类型和自定义类型）
+    bool hasType(const QString &type) const;
+
+    // 检查是否为默认类型
+    bool isDefaultType(const QString &type) const;
+
+    // 检查自定义类型是否存在
     bool hasCustomType(const QString &type) const;
 
     // ==================== 数据持久化 ====================
@@ -104,6 +116,9 @@ private:
     QMap<QString, QString> m_modTypes;   // PackageId -> Type
     QMap<QString, QString> m_modRemarks; // PackageId -> Remark
     QStringList m_customTypes;           // 自定义类型列表
+
+    // 默认类型列表
+    static const QStringList s_defaultTypes;
 
     // 文件名常量
     static const QString MOD_DATA_FILE;

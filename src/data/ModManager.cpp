@@ -5,8 +5,7 @@
 ModManager::ModManager()
     : m_workshopScanner(new WorkshopScanner()),
       m_dlcScanner(new OfficialDLCScanner()),
-      m_userDataManager(new UserDataManager())
-{
+      m_userDataManager(new UserDataManager()) {
     // 初始化用户数据目录
     UserDataManager::initializeDirectories();
 
@@ -18,8 +17,7 @@ ModManager::ModManager(const QString &steamPath)
     : m_steamPath(steamPath),
       m_workshopScanner(new WorkshopScanner()),
       m_dlcScanner(new OfficialDLCScanner()),
-      m_userDataManager(new UserDataManager())
-{
+      m_userDataManager(new UserDataManager()) {
     // 初始化用户数据目录
     UserDataManager::initializeDirectories();
 
@@ -38,8 +36,7 @@ ModManager::ModManager(const QString &steamPath)
     m_dlcScanner->setDataPath(dataPath);
 }
 
-ModManager::~ModManager()
-{
+ModManager::~ModManager() {
     // 在销毁前保存用户数据
     saveModsToUserData();
     m_userDataManager->saveAll();
@@ -55,8 +52,7 @@ ModManager::~ModManager()
     m_packageIdMap.clear();
 }
 
-void ModManager::setSteamPath(const QString &steamPath)
-{
+void ModManager::setSteamPath(const QString &steamPath) {
     m_steamPath = steamPath;
 
     // 更新扫描器路径
@@ -70,8 +66,7 @@ void ModManager::setSteamPath(const QString &steamPath)
     m_dlcScanner->setDataPath(dataPath);
 }
 
-void ModManager::setGameInstallPath(const QString &gameInstallPath)
-{
+void ModManager::setGameInstallPath(const QString &gameInstallPath) {
     m_gameInstallPath = gameInstallPath;
 
     // 更新DLC扫描器路径
@@ -79,8 +74,7 @@ void ModManager::setGameInstallPath(const QString &gameInstallPath)
     m_dlcScanner->setDataPath(dataPath);
 }
 
-bool ModManager::scanAll()
-{
+bool ModManager::scanAll() {
     // 清除旧数据
     clear();
 
@@ -94,19 +88,16 @@ bool ModManager::scanAll()
     return workshopSuccess || dlcSuccess;
 }
 
-bool ModManager::scanWorkshopMods()
-{
+bool ModManager::scanWorkshopMods() {
     // 使用扫描器扫描
     bool success = m_workshopScanner->scanAllMods();
 
-    if (success)
-    {
+    if (success) {
         // 缓存扫描结果
         m_cachedWorkshopMods = m_workshopScanner->getScannedMods();
 
         // 更新PackageId映射
-        for (ModItem *mod : m_cachedWorkshopMods)
-        {
+        for (ModItem *mod: m_cachedWorkshopMods) {
             m_packageIdMap[mod->packageId] = mod;
         }
 
@@ -116,19 +107,16 @@ bool ModManager::scanWorkshopMods()
     return success;
 }
 
-bool ModManager::scanOfficialDLCs()
-{
+bool ModManager::scanOfficialDLCs() {
     // 使用扫描器扫描
     bool success = m_dlcScanner->scanAllDLCs();
 
-    if (success)
-    {
+    if (success) {
         // 缓存扫描结果
         m_cachedOfficialDLCs = m_dlcScanner->getScannedDLCs();
 
         // 更新PackageId映射
-        for (ModItem *dlc : m_cachedOfficialDLCs)
-        {
+        for (ModItem *dlc: m_cachedOfficialDLCs) {
             m_packageIdMap[dlc->packageId] = dlc;
         }
 
@@ -138,8 +126,7 @@ bool ModManager::scanOfficialDLCs()
     return success;
 }
 
-QList<ModItem *> ModManager::getAllMods() const
-{
+QList<ModItem *> ModManager::getAllMods() const {
     QList<ModItem *> allMods;
 
     // 先添加官方DLC
@@ -151,51 +138,43 @@ QList<ModItem *> ModManager::getAllMods() const
     return allMods;
 }
 
-QList<ModItem *> ModManager::getWorkshopMods() const
-{
+QList<ModItem *> ModManager::getWorkshopMods() const {
     return m_cachedWorkshopMods;
 }
 
-QList<ModItem *> ModManager::getOfficialDLCs() const
-{
+QList<ModItem *> ModManager::getOfficialDLCs() const {
     return m_cachedOfficialDLCs;
 }
 
-ModItem *ModManager::findModByPackageId(const QString &packageId) const
-{
+ModItem *ModManager::findModByPackageId(const QString &packageId) const {
     return m_packageIdMap.value(packageId, nullptr);
 }
 
-bool ModManager::isOfficialDLC(const QString &packageId) const
-{
+bool ModManager::isOfficialDLC(const QString &packageId) const {
     ModItem *mod = findModByPackageId(packageId);
-    return mod != nullptr && mod->isOfficialDLC;
+    return mod && mod->isOfficialDLC;
 }
 
-void ModManager::loadUserDataToMods()
-{
+void ModManager::loadUserDataToMods() {
     int loadedCount = 0;
 
     // 遍历所有缓存的Mod
     QList<ModItem *> allMods = getAllMods();
 
-    for (ModItem *mod : allMods)
-    {
+    for (ModItem *mod: allMods) {
         if (!mod)
             continue;
 
         // 从UserDataManager加载类型
         QString type = m_userDataManager->getModType(mod->packageId);
-        if (!type.isEmpty())
-        {
+        if (!type.isEmpty()) {
             mod->type = type;
             loadedCount++;
         }
 
         // 从UserDataManager加载备注
         QString remark = m_userDataManager->getModRemark(mod->packageId);
-        if (!remark.isEmpty())
-        {
+        if (!remark.isEmpty()) {
             mod->remark = remark;
             loadedCount++;
         }
@@ -204,28 +183,24 @@ void ModManager::loadUserDataToMods()
     qDebug() << "[ModManager] Loaded user data to" << loadedCount << "fields across" << allMods.size() << "mods";
 }
 
-void ModManager::saveModsToUserData()
-{
+void ModManager::saveModsToUserData() {
     int savedCount = 0;
 
     // 遍历所有缓存的Mod
     QList<ModItem *> allMods = getAllMods();
 
-    for (ModItem *mod : allMods)
-    {
+    for (ModItem *mod: allMods) {
         if (!mod)
             continue;
 
         // 保存类型到UserDataManager
-        if (!mod->type.isEmpty())
-        {
+        if (!mod->type.isEmpty()) {
             m_userDataManager->setModType(mod->packageId, mod->type);
             savedCount++;
         }
 
         // 保存备注到UserDataManager
-        if (!mod->remark.isEmpty())
-        {
+        if (!mod->remark.isEmpty()) {
             m_userDataManager->setModRemark(mod->packageId, mod->remark);
             savedCount++;
         }
@@ -237,8 +212,7 @@ void ModManager::saveModsToUserData()
     m_userDataManager->saveModData();
 }
 
-void ModManager::clear()
-{
+void ModManager::clear() {
     // 清理扫描器（这会删除内部的ModItem对象）
     m_workshopScanner->clear();
     m_dlcScanner->clear();

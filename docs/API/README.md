@@ -36,11 +36,6 @@
    - 区分官方内容和 Mod
    - 游戏路径管理
 
-7. **[ModTypeManager](ModTypeManager_API.md)** - Mod 类型管理
-   - 默认类型定义
-   - 自定义类型管理
-   - 类型验证
-
 ### 架构图
 
 ```

@@ -11,6 +11,19 @@
 const QString UserDataManager::MOD_DATA_FILE = "mod_data.json";
 const QString UserDataManager::CUSTOM_TYPES_FILE = "custom_types.json";
 
+// 定义默认类型列表
+const QStringList UserDataManager::s_defaultTypes = {
+    "核心",
+    "DLC",
+    "前置框架",
+    "逻辑mod",
+    "功能性mod",
+    "种族mod",
+    "种族扩展mod",
+    "单一功能mod",
+    "汉化",
+    "优化"};
+
 UserDataManager::UserDataManager()
 {
     // 初始化目录结构
@@ -60,11 +73,37 @@ QStringList UserDataManager::getAllCustomTypes() const
     return m_customTypes;
 }
 
+QStringList UserDataManager::getAllTypes() const
+{
+    QStringList allTypes = s_defaultTypes;
+
+    // 添加自定义类型
+    for (const QString &type : m_customTypes)
+    {
+        if (!allTypes.contains(type))
+        {
+            allTypes.append(type);
+        }
+    }
+
+    return allTypes;
+}
+
+QStringList UserDataManager::getDefaultTypes()
+{
+    return s_defaultTypes;
+}
+
 bool UserDataManager::addCustomType(const QString &type)
 {
-    if (type.isEmpty() || m_customTypes.contains(type))
+    if (type.isEmpty() || s_defaultTypes.contains(type))
     {
-        return false;
+        return false; // 不能添加空类型或与默认类型重复的类型
+    }
+
+    if (m_customTypes.contains(type))
+    {
+        return false; // 已存在
     }
 
     m_customTypes.append(type);
@@ -73,7 +112,22 @@ bool UserDataManager::addCustomType(const QString &type)
 
 bool UserDataManager::removeCustomType(const QString &type)
 {
+    if (s_defaultTypes.contains(type))
+    {
+        return false; // 不能删除默认类型
+    }
+
     return m_customTypes.removeOne(type);
+}
+
+bool UserDataManager::hasType(const QString &type) const
+{
+    return s_defaultTypes.contains(type) || m_customTypes.contains(type);
+}
+
+bool UserDataManager::isDefaultType(const QString &type) const
+{
+    return s_defaultTypes.contains(type);
 }
 
 bool UserDataManager::hasCustomType(const QString &type) const

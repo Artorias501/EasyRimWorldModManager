@@ -292,10 +292,9 @@ configManager.saveConfig("path/to/custom_config.xml");  // 另存为
 - 🎯 **[ModManager API](docs/API/ModManager_API.md)** - 推荐使用的中心管理类
 - 📦 **[ModItem API](docs/API/ModItem_API.md)** - Mod 数据结构
 - ⚙️ **[ModConfigManager API](docs/API/ModConfigManager_API.md)** - 游戏配置管理
-- 💾 **[UserDataManager API](docs/API/UserDataManager_API.md)** - 用户数据持久化
+- 💾 **[UserDataManager API](docs/API/UserDataManager_API.md)** - 用户数据持久化（包含类型管理）
 - 🔍 **[WorkshopScanner API](docs/API/WorkshopScanner_API.md)** - Steam 创意工坊扫描
 - 🎮 **[OfficialDLCScanner API](docs/API/OfficialDLCScanner_API.md)** - 官方内容扫描
-- 🏷️ **[ModTypeManager API](docs/API/ModTypeManager_API.md)** - Mod 类型管理
 
 ### 其他文档
 
