@@ -282,6 +282,27 @@ configManager.saveConfig("path/to/custom_config.xml");  // 另存为
 - Qt 6.10.1
 - CMake 3.31
 
+## 文档
+
+### API 文档
+
+完整的后端 API 文档请查看：
+
+- 📚 **[API 文档索引](docs/API/README.md)** - 完整的 API 参考和使用指南
+- 🎯 **[ModManager API](docs/API/ModManager_API.md)** - 推荐使用的中心管理类
+- 📦 **[ModItem API](docs/API/ModItem_API.md)** - Mod 数据结构
+- ⚙️ **[ModConfigManager API](docs/API/ModConfigManager_API.md)** - 游戏配置管理
+- 💾 **[UserDataManager API](docs/API/UserDataManager_API.md)** - 用户数据持久化
+- 🔍 **[WorkshopScanner API](docs/API/WorkshopScanner_API.md)** - Steam 创意工坊扫描
+- 🎮 **[OfficialDLCScanner API](docs/API/OfficialDLCScanner_API.md)** - 官方内容扫描
+- 🏷️ **[ModTypeManager API](docs/API/ModTypeManager_API.md)** - Mod 类型管理
+
+### 其他文档
+
+- [测试指南](docs/test_guide.md) - 如何运行和编写测试
+- [ModManager 重构文档](docs/ModManager_Refactoring.md) - 架构重构说明
+- [空白 Mod 列表功能](docs/empty_modlist_feature.md) - 空白列表使用说明
+
 ## 构建说明
 
 1. 确保已安装Qt 6.10.1
