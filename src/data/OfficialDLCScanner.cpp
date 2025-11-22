@@ -92,10 +92,30 @@ ModItem *OfficialDLCScanner::scanDLCDirectory(const QString &dlcDirPath)
         return nullptr;
     }
 
-    // 标记为官方DLC
-    dlc->isOfficialDLC = true;
     dlc->sourcePath = dlcDirPath;
-    dlc->type = "DLC"; // 默认类型设置为DLC
+
+    // 判断是否为Core（Ludeon.RimWorld），Core不应标记为官方DLC
+    if (dlc->packageId.compare("Ludeon.RimWorld", Qt::CaseInsensitive) == 0)
+    {
+        dlc->isOfficialDLC = false;
+        dlc->type = "Core";
+        // 官方内容可能没有name字段，使用packageId
+        if (dlc->name.isEmpty())
+        {
+            dlc->name = "RimWorld Core";
+        }
+    }
+    else
+    {
+        // 其他官方DLC
+        dlc->isOfficialDLC = true;
+        dlc->type = "DLC";
+        // 官方DLC可能没有name字段，使用packageId作为fallback
+        if (dlc->name.isEmpty())
+        {
+            dlc->name = dlc->packageId;
+        }
+    }
 
     return dlc;
 }

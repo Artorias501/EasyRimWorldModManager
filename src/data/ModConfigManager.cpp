@@ -1,4 +1,5 @@
 #include "ModConfigManager.h"
+#include "ModItem.h"
 #include <QDir>
 #include <QFile>
 #include <QStandardPaths>
@@ -36,6 +37,39 @@ bool ModConfigManager::loadConfig(const QString &configPath)
     return parseXml(xmlContent);
 }
 
+bool ModConfigManager::loadConfigWithEmptyMods()
+{
+    return loadConfigWithEmptyMods(getDefaultConfigPath());
+}
+
+bool ModConfigManager::loadConfigWithEmptyMods(const QString &configPath)
+{
+    m_configPath = configPath;
+
+    QFile file(configPath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return false;
+    }
+
+    QString xmlContent = file.readAll();
+    file.close();
+
+    // 解析配置文件
+    if (!parseXml(xmlContent))
+    {
+        return false;
+    }
+
+    // 清空activeMods和knownExpansions列表
+    // knownExpansions是从activeMods中筛选出的官方DLC，所以也应该清空
+    // 只保留version和其他字段
+    m_activeMods.clear();
+    m_knownExpansions.clear();
+
+    return true;
+}
+
 bool ModConfigManager::saveConfig()
 {
     return saveConfig(m_configPath);
@@ -69,6 +103,30 @@ bool ModConfigManager::saveConfig(const QString &configPath)
 void ModConfigManager::setActiveMods(const QStringList &mods)
 {
     m_activeMods = mods;
+}
+
+void ModConfigManager::setActiveModsFromList(const QList<ModItem *> &modList)
+{
+    m_activeMods.clear();
+    m_knownExpansions.clear();
+
+    for (ModItem *mod : modList)
+    {
+        if (!mod || !mod->isValid())
+        {
+            continue;
+        }
+
+        // 所有mod都加入activeMods
+        m_activeMods.append(mod->packageId);
+
+        // 只有官方DLC（isOfficialDLC=true）才加入knownExpansions
+        // Core不会被加入，因为在OfficialDLCScanner中已经将其isOfficialDLC设为false
+        if (mod->isOfficialDLC)
+        {
+            m_knownExpansions.append(mod->packageId);
+        }
+    }
 }
 
 void ModConfigManager::addMod(const QString &modId)

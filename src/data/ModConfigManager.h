@@ -1,9 +1,12 @@
 #ifndef MODCONFIGMANAGER_H
 #define MODCONFIGMANAGER_H
 
+#include <QList>
 #include <QMap>
 #include <QString>
 #include <QStringList>
+
+struct ModItem; // 前向声明
 
 /**
  * @brief ModsConfig.xml 配置文件管理器
@@ -24,6 +27,11 @@ public:
     bool loadConfig();
 
     bool loadConfig(const QString &configPath);
+
+    // 创建空白加载列表（从默认配置文件读取版本和其他字段，但activeMods和knownExpansions为空）
+    bool loadConfigWithEmptyMods();
+
+    bool loadConfigWithEmptyMods(const QString &configPath);
 
     // 保存配置
     bool saveConfig();
@@ -49,6 +57,9 @@ public:
 
     // 设置激活的Mod列表
     void setActiveMods(const QStringList &mods);
+
+    // 从ModItem列表设置配置（自动区分activeMods和knownExpansions）
+    void setActiveModsFromList(const QList<ModItem *> &modList);
 
     // 添加/移除 Mod
     void addMod(const QString &modId);

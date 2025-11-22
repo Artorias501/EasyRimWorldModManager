@@ -121,46 +121,67 @@ EasyRimWorldModManager.exe所在目录\
 
 程序在保存Mod配置时，遵循以下原则：
 
-1. **只修改必要的字段**：
-   - ✅ 修改 `<activeMods>` - Mod加载顺序
-   - ✅ 保持 `<knownExpansions>` - 官方DLC列表（通常不变）
+1. **Mod扫描与配置的关系**：
+   - `WorkshopScanner`：扫描Steam创意工坊路径，获取所有创意工坊mod（`isOfficialDLC=false`）
+   - `OfficialDLCScanner`：扫描游戏Data文件夹，获取Core和所有官方DLC
+     - **Core（ludeon.rimworld.core）特殊处理**：`isOfficialDLC=false`，`type="Core"`
+     - **其他官方DLC**：`isOfficialDLC=true`，`type="DLC"`
+   - `ModConfigManager`：整合所有扫描到的mod，并生成XML配置
+
+2. **XML字段生成规则**：
+   - `<activeMods>`：包含**所有**启用的mod（Core + DLC + 创意工坊mod）
+   - `<knownExpansions>`：**仅包含官方DLC**（通过`isOfficialDLC=true`筛选）
+     - ✅ 包含：`ludeon.rimworld.royalty`、`ludeon.rimworld.ideology`等DLC
+     - ❌ 不包含：`ludeon.rimworld.core`（Core不是扩展包）
+     - ❌ 不包含：创意工坊mod
+   - `<version>`：游戏版本信息（**保持原文件值不变**）
+
+3. **字段修改原则**：
+   - ✅ 修改 `<activeMods>` - Mod加载顺序和启用列表
+   - ✅ 修改 `<knownExpansions>` - 通过`isOfficialDLC`自动生成
    - ❌ **不修改** `<version>` - 游戏版本信息
    - ❌ **不修改** 其他所有未知字段
 
-2. **完整保留原文件结构**：
+4. **完整保留原文件结构**：
    ```xml
    <?xml version="1.0" encoding="utf-8"?>
    <ModsConfigData>
-     <version>1.6.4633 rev1261</version>        <!-- 保持不变 -->
+     <version>1.6.4633 rev1261</version>        <!-- 保持原文件值 -->
      <activeMods>
+       <li>ludeon.rimworld.core</li>            <!-- Core在activeMods中 -->
        <li>brrainz.harmony</li>                 <!-- 可修改：调整顺序 -->
-       <li>ludeon.rimworld</li>                 <!-- 可修改：增删Mod -->
+       <li>ludeon.rimworld.royalty</li>         <!-- DLC也在activeMods中 -->
+       <li>workshop.mod.12345</li>              <!-- 创意工坊mod -->
        ...
      </activeMods>
      <knownExpansions>
-       <li>ludeon.rimworld.royalty</li>         <!-- 保持不变 -->
-       <li>ludeon.rimworld.ideology</li>        <!-- 保持不变 -->
+       <li>ludeon.rimworld.royalty</li>         <!-- 仅DLC（isOfficialDLC=true） -->
+       <li>ludeon.rimworld.ideology</li>        <!-- Core不在这里 -->
        ...
      </knownExpansions>
      <!-- 其他任何字段都会被保留 -->
    </ModsConfigData>
    ```
 
-3. **工作流程**：
+5. **工作流程**：
    ```
-   读取 ModsConfig.xml
-   ↓
-   解析并保存所有字段（包括未知字段）
-   ↓
-   用户修改 activeMods（调整顺序、增删Mod）
-   ↓
-   保存时：
-   - 写入原始的 version
-   - 写入修改后的 activeMods
-   - 写入原始的 knownExpansions
-   - 写入所有其他保存的字段
-   ↓
-   生成的文件与原文件结构完全一致（除了 activeMods）
+   1. 扫描阶段：
+      WorkshopScanner → 创意工坊mod (isOfficialDLC=false)
+      OfficialDLCScanner → Core (isOfficialDLC=false, type="Core")
+                         → DLC (isOfficialDLC=true, type="DLC")
+   
+   2. 配置生成阶段：
+      ModConfigManager.setActiveModsFromList(所有mod)
+      ↓
+      activeMods = 所有mod的packageId
+      knownExpansions = 筛选出isOfficialDLC=true的mod
+   
+   3. 保存阶段：
+      读取原始 ModsConfig.xml → 保存version和其他字段
+      ↓
+      写入新的 activeMods 和 knownExpansions
+      ↓
+      写入所有保留的字段
    ```
 
 ### 保存选项
@@ -211,6 +232,49 @@ userDataManager.saveModListToPath(
 // 6. 保存用户数据（类型、备注）
 userDataManager.saveAll();
 ```
+
+### 创建空白加载列表
+
+如果需要从零开始配置mod列表，可以使用空白加载列表功能：
+
+```cpp
+// 创建空白加载列表（从游戏配置读取版本和其他字段，但mod列表为空）
+ModConfigManager configManager;
+configManager.loadConfigWithEmptyMods();  // 从默认路径读取
+
+// 或指定配置文件路径
+configManager.loadConfigWithEmptyMods("path/to/ModsConfig.xml");
+
+// 此时：
+// - version: 从原配置读取（如 "1.6.4633 rev1261"）
+// - activeMods: 空列表
+// - knownExpansions: 空列表（因为没有已加载的官方DLC）
+// - 其他字段: 从原配置读取并保留
+
+// 添加想要的mod
+configManager.addMod("ludeon.rimworld.core");  // 添加Core
+configManager.addMod("brrainz.harmony");        // 添加Harmony
+configManager.addMod("ludeon.rimworld.royalty"); // 添加DLC
+
+// 或从ModItem列表设置（推荐方式，会自动生成knownExpansions）
+QList<ModItem*> selectedMods = { /* ... */ };
+configManager.setActiveModsFromList(selectedMods);
+// setActiveModsFromList会：
+// - 将所有mod的packageId添加到activeMods
+// - 自动将isOfficialDLC=true的mod添加到knownExpansions
+
+// 保存配置
+configManager.saveConfig();  // 保存到原路径
+// 或
+configManager.saveConfig("path/to/custom_config.xml");  // 另存为
+```
+
+**空白加载列表的优势：**
+- ✅ 保留游戏版本信息
+- ✅ 保留所有其他配置字段
+- ✅ 从零开始精确控制mod加载顺序
+- ✅ 使用setActiveModsFromList时会自动正确生成knownExpansions
+- ✅ 适合创建特定用途的mod配置（如测试、特定玩法）
 
 ## 技术栈
 
