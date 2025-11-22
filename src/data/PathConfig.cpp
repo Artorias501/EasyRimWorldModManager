@@ -6,17 +6,14 @@
 #include <QJsonObject>
 #include <QStandardPaths>
 
-PathConfig::PathConfig()
-{
+PathConfig::PathConfig() {
 }
 
-bool PathConfig::load()
-{
+bool PathConfig::load() {
     QString filePath = getConfigFilePath();
 
     QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "无法打开路径配置文件:" << filePath;
         return false;
     }
@@ -25,8 +22,7 @@ bool PathConfig::load()
     file.close();
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (!doc.isObject())
-    {
+    if (!doc.isObject()) {
         qWarning() << "路径配置文件格式错误";
         return false;
     }
@@ -44,17 +40,14 @@ bool PathConfig::load()
     return true;
 }
 
-bool PathConfig::save() const
-{
+bool PathConfig::save() const {
     QString filePath = getConfigFilePath();
 
     // 确保目录存在
     QFileInfo fileInfo(filePath);
     QDir dir = fileInfo.dir();
-    if (!dir.exists())
-    {
-        if (!dir.mkpath("."))
-        {
+    if (!dir.exists()) {
+        if (!dir.mkpath(".")) {
             qWarning() << "无法创建配置目录:" << dir.path();
             return false;
         }
@@ -68,8 +61,7 @@ bool PathConfig::save() const
     QJsonDocument doc(root);
 
     QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qWarning() << "无法写入路径配置文件:" << filePath;
         return false;
     }
@@ -81,33 +73,29 @@ bool PathConfig::save() const
     return true;
 }
 
-bool PathConfig::configExists()
-{
+bool PathConfig::configExists() {
     QString filePath = getConfigFilePath();
     return QFile::exists(filePath);
 }
 
-bool PathConfig::isValid() const
-{
+bool PathConfig::isValid() const {
     return !m_gameInstallPath.isEmpty() &&
            !m_steamPath.isEmpty() &&
            !m_userSavePath.isEmpty();
 }
 
-QString PathConfig::getDefaultUserSavePath()
-{
+QString PathConfig::getDefaultUserSavePath() {
     // RimWorld 默认存档路径
     // Windows: C:/Users/{username}/AppData/LocalLow/Ludeon Studios/RimWorld by Ludeon Studios
     QString localLowPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-    localLowPath = localLowPath.replace("/Local/", "/LocalLow/");
+    localLowPath = localLowPath.replace("/Local", "/LocalLow");
 
     QString savePath = QDir(localLowPath).absoluteFilePath("Ludeon Studios/RimWorld by Ludeon Studios");
 
     return savePath;
 }
 
-QString PathConfig::getConfigFilePath()
-{
+QString PathConfig::getConfigFilePath() {
     // 配置文件路径：程序目录/UserData/path.json
     QString appDir = QDir::currentPath();
     return QDir(appDir).absoluteFilePath("UserData/path.json");
