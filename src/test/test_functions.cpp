@@ -34,12 +34,12 @@ void printModInfo(const ModItem *mod, int index = -1)
 
 void test_ScanInstalledModsAndDLCs()
 {
-    printSeparator("测试1：扫描所有已安装的mod和DLC");
+    printSeparator("测试1：扫描所有已安装的mod和DLC（通过ModManager）");
 
     // 创建ModManager
     ModManager modManager;
 
-    // 检测Steam路径
+    // 检测Steam路径（通过WorkshopScanner的静态方法）
     QString steamPath = WorkshopScanner::detectSteamPath();
     if (steamPath.isEmpty())
     {
@@ -55,7 +55,7 @@ void test_ScanInstalledModsAndDLCs()
     qDebug() << "游戏安装路径:" << gameInstallPath;
     modManager.setGameInstallPath(gameInstallPath);
 
-    // 扫描所有mod
+    // 扫描所有mod（ModManager会自动调用扫描器并缓存结果）
     qDebug() << "\n正在扫描...";
     if (!modManager.scanAll())
     {
@@ -63,7 +63,7 @@ void test_ScanInstalledModsAndDLCs()
         return;
     }
 
-    // 显示扫描结果
+    // 显示扫描结果（从ModManager缓存获取）
     QList<ModItem *> workshopMods = modManager.getWorkshopMods();
     QList<ModItem *> officialDLCs = modManager.getOfficialDLCs();
 
@@ -83,6 +83,38 @@ void test_ScanInstalledModsAndDLCs()
     for (int i = 0; i < officialDLCs.size(); ++i)
     {
         printModInfo(officialDLCs[i], i + 1);
+    }
+
+    // 测试UserDataManager联动
+    qDebug() << "\n测试UserDataManager联动:";
+    qDebug() << "   为部分mod添加备注和自定义类型...";
+
+    // 为前2个工坊mod添加备注和类型
+    if (workshopMods.size() >= 2)
+    {
+        workshopMods[0]->remark = "测试备注1";
+        workshopMods[0]->type = "功能性";
+
+        workshopMods[1]->remark = "测试备注2";
+        workshopMods[1]->type = "美化";
+
+        // 保存到UserDataManager
+        modManager.saveModsToUserData();
+        qDebug() << "   ✓ 备注和类型已保存到UserDataManager";
+
+        // 清除并重新扫描，测试数据恢复
+        modManager.clear();
+        modManager.scanAll();
+
+        QList<ModItem *> reloadedMods = modManager.getWorkshopMods();
+        if (reloadedMods.size() >= 2)
+        {
+            qDebug() << "   ✓ 重新扫描后数据恢复测试:";
+            qDebug() << "     Mod1 备注:" << reloadedMods[0]->remark;
+            qDebug() << "     Mod1 类型:" << reloadedMods[0]->type;
+            qDebug() << "     Mod2 备注:" << reloadedMods[1]->remark;
+            qDebug() << "     Mod2 类型:" << reloadedMods[1]->type;
+        }
     }
 
     qDebug() << "\n✓ 测试1完成";
@@ -146,7 +178,7 @@ void test_ReadCurrentModList()
 
 void test_ModifyModListAndDLCs()
 {
-    printSeparator("测试3：修改mod列表排序并添加/移除DLC");
+    printSeparator("测试3：修改mod列表排序并添加/移除DLC（通过ModManager）");
 
     // 1. 读取当前配置
     ModConfigManager configManager;
@@ -160,8 +192,8 @@ void test_ModifyModListAndDLCs()
     qDebug() << "   - 激活mod数:" << configManager.getActiveMods().size();
     qDebug() << "   - knownExpansions数:" << configManager.getKnownExpansions().size();
 
-    // 2. 扫描所有可用mod
-    qDebug() << "\n2. 扫描可用mod...";
+    // 2. 通过ModManager扫描所有可用mod
+    qDebug() << "\n2. 通过ModManager扫描可用mod...";
     ModManager modManager;
     QString steamPath = WorkshopScanner::detectSteamPath();
     if (steamPath.isEmpty())
@@ -176,10 +208,10 @@ void test_ModifyModListAndDLCs()
         qDebug() << "❌ 扫描失败";
         return;
     }
-    qDebug() << "   ✓ 扫描完成";
+    qDebug() << "   ✓ 扫描完成（ModManager已缓存所有mod）";
 
-    // 3. 构建新的mod列表
-    qDebug() << "\n3. 构建新的mod列表...";
+    // 3. 从ModManager缓存构建新的mod列表
+    qDebug() << "\n3. 从ModManager缓存构建新的mod列表...";
     QList<ModItem *> allMods = modManager.getAllMods();
     QList<ModItem *> newModList;
 
@@ -237,14 +269,14 @@ void test_ModifyModListAndDLCs()
 
     // 5. 保存到UserData
     qDebug() << "\n5. 保存配置到 UserData...";
-    UserDataManager userDataManager;
+    UserDataManager *userDataManager = modManager.getUserDataManager();
     QString savePath = "UserData/ModList/test_modified_config.xml";
 
     // 确保目录存在
     QFileInfo fileInfo(savePath);
     QDir().mkpath(fileInfo.absolutePath());
 
-    if (userDataManager.saveModListToPath(
+    if (userDataManager->saveModListToPath(
             savePath,
             configManager.getActiveMods(),
             configManager.getKnownExpansions(),
@@ -278,7 +310,7 @@ void test_ModifyModListAndDLCs()
 
         // 保存排序后的配置
         QString sortedPath = "UserData/ModList/test_sorted_config.xml";
-        userDataManager.saveModListToPath(
+        userDataManager->saveModListToPath(
             sortedPath,
             configManager.getActiveMods(),
             configManager.getKnownExpansions(),
@@ -293,7 +325,7 @@ void test_ModifyModListAndDLCs()
 
 void test_CreateEmptyModList()
 {
-    printSeparator("测试4：创建空白加载列表并添加mod");
+    printSeparator("测试4：创建空白加载列表并添加mod（通过ModManager）");
 
     // 1. 创建空白配置
     ModConfigManager configManager;
@@ -310,8 +342,8 @@ void test_CreateEmptyModList()
     qDebug() << "   - activeMods数:" << configManager.getActiveMods().size() << "(应为0)";
     qDebug() << "   - knownExpansions数:" << configManager.getKnownExpansions().size() << "(应为0)";
 
-    // 2. 扫描可用mod
-    qDebug() << "\n2. 扫描可用mod...";
+    // 2. 通过ModManager扫描可用mod
+    qDebug() << "\n2. 通过ModManager扫描可用mod...";
     ModManager modManager;
     QString steamPath = WorkshopScanner::detectSteamPath();
     if (steamPath.isEmpty())
@@ -326,10 +358,10 @@ void test_CreateEmptyModList()
         qDebug() << "❌ 扫描失败";
         return;
     }
-    qDebug() << "   ✓ 扫描完成";
+    qDebug() << "   ✓ 扫描完成（ModManager已缓存所有mod）";
 
-    // 3. 选择要添加的mod
-    qDebug() << "\n3. 选择并添加mod...";
+    // 3. 从ModManager缓存选择要添加的mod
+    qDebug() << "\n3. 从ModManager缓存选择并添加mod...";
     QList<ModItem *> allMods = modManager.getAllMods();
     QList<ModItem *> selectedMods;
 
@@ -408,16 +440,16 @@ void test_CreateEmptyModList()
         }
     }
 
-    // 6. 保存到UserData
+    // 6. 保存到UserData（使用ModManager的UserDataManager）
     qDebug() << "\n6. 保存配置到 UserData...";
-    UserDataManager userDataManager;
+    UserDataManager *userDataManager = modManager.getUserDataManager();
     QString savePath = "UserData/ModList/test_empty_start_config.xml";
 
     // 确保目录存在
     QFileInfo fileInfo(savePath);
     QDir().mkpath(fileInfo.absolutePath());
 
-    if (userDataManager.saveModListToPath(
+    if (userDataManager->saveModListToPath(
             savePath,
             configManager.getActiveMods(),
             configManager.getKnownExpansions(),
